@@ -1,0 +1,137 @@
+version: "3.3"
+services:
+  mysql-db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      # So you don't have to use root, but you can if you like
+      MYSQL_USER: "maul"
+      # You can use whatever password you like
+      MYSQL_PASSWORD: "maul"
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: "password"
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      - "3306:3306"
+    expose:
+      # Opens port 3306 on the container
+      - "3306"
+      # Where our data will be persisted
+    volumes:
+      - /home/maul/Database/mysql:/var/lib/mysql
+      - $PWD/mysql.conf:/etc/mysql/conf.d/mysql.cnf
+
+
+  # mysql-db:
+  #   image: mysql:8.0
+  #   restart: always
+  #   environment:
+  #     # So you don't have to use root, but you can if you like
+  #     MYSQL_USER: "maul"
+  #     # You can use whatever password you like
+  #     MYSQL_PASSWORD: "maul"
+  #     # Password for root access
+  #     MYSQL_ROOT_PASSWORD: "password"
+  #   ports:
+  #     # <Port exposed> : < MySQL Port running inside container>
+  #     - "3306:3306"
+  #   expose:
+  #     # Opens port 3306 on the container
+  #     - "3306"
+  #     # Where our data will be persisted
+  #   volumes:
+  #     - /home/maul/Database/mysql:/var/lib/mysql
+  #     # - $PWD/mysql.conf:/etc/mysql/conf.d/mysql.cnf
+
+  postgress-db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      # <Port exposed> : < Postgres Port running inside container>
+      - "5432:5432"
+    expose:
+      # Opens port 5432 on the container
+      - "5432"
+      # Where our data will be persisted
+    volumes:
+      - /home/maul/Database/postgres:/var/lib/postgresql/data
+
+  redis-db:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - /home/maul/Database/mongo:/data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 6500:8081
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9000:8080
+    environment:
+      - ADMINER_DESIGN='nette'
+
+  pma:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 9001:80
+    environment:
+      - PMA_ARBITRARY=1
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 9002:80
+    environment:
+      - "PGADMIN_DEFAULT_EMAIL=mprambadi@refactory.id"
+      - "PGADMIN_DEFAULT_PASSWORD=password"
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=local:redis-db  :6379
+    ports:
+    - "9003:8081"  
+
+  redis-admin:
+    container_name: redis_admin
+    image: erikdubbelboer/phpredisadmin
+    restart: always
+    environment: 
+    - REDIS_1_HOST=redis-db
+    ports:
+      - "9004:80" 
+
+  php-redis-admin:
+      image: faktiva/php-redis-admin
+      container_name: pra
+      environment:
+          - PHPREDMIN_DATABASE_REDIS_0_HOST=redis-db
+      ports:
+          - "9005:80"
+  # sqlserver:
+  #   build: ./sql-server
+  #   ports:
+  #     - "1433:1433"
+  #   expose:
+  #     - "1433"
